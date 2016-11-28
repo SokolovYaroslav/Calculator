@@ -1,6 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "big_number_get.h"
+#include "stack.h"
+
+void BN_del (big_number *the_big_number) {
+	while (the_big_number->head->next != NULL) {
+		the_big_number->head = the_big_number->head->next;
+		free(the_big_number->head->previous);
+	}
+	free(the_big_number->head);
+	free(the_big_number);
+}
 
 void BN_add_digit (big_number *number, unsigned char the_new_digit) {
 	node *new_digit;
@@ -34,4 +44,10 @@ big_number* BN_get (char sign, unsigned char the_first_digit) {
 		exit(0);
 	}
 	return number;
+}
+
+void BN_addition () {
+	big_number *a = stack_pop();
+	big_number *b = stack_pop();
+	
 }

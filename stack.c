@@ -15,7 +15,7 @@ void stack_realloc () {
 	stack = (big_number**)realloc(stack, sizeof(big_number*) * stack_size);
 }
 
-void stack_push (big_number* new_big_number) {
+void stack_push (big_number *new_big_number) {
 	if (!(stack_size - stack_pointer)) {
 		stack_realloc();
 	}
