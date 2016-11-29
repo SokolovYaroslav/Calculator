@@ -5,11 +5,17 @@
 
 int main () {
 	int c;
-	char natural_was_here = 0;
+	stack_launch();
 	while((c = getchar()) != EOF) {
 		if (c == '+') {
-			//BN_addition
-			while ((c = getchar()) != '\n') {
+			if (stack_size() < 2) {
+				printf("Not enough number to add\n");
+				continue;
+			}
+			else {
+				stack_push(BN_addition(stack_pop(), stack_pop()));
+			}
+			while (getchar() != '\n') {
 				if (ferror(stdin)) {
 					printf("An error occurred while reading the symbols\n");
 					exit(0);
@@ -19,7 +25,7 @@ int main () {
 		}
 		else if (c == '*') {
 			//BN_multiple
-			while ((c = getchar()) != '\n') {
+			while (getchar() != '\n') {
 				if (ferror(stdin)) {
 					printf("An error occurred while reading the symbols\n");
 					exit(0);
@@ -29,7 +35,7 @@ int main () {
 		}
 		else if (c == '/') {
 			//BN_division
-			while ((c = getchar()) != '\n') {
+			while (getchar() != '\n') {
 				if (ferror(stdin)) {
 					printf("An error occurred while reading the symbols\n");
 					exit(0);
@@ -48,36 +54,15 @@ int main () {
 				continue;
 			}
 			else if (((0 + '0') <= c) && (c <= (9 + '0'))) {
-				if (!natural_was_here) {
-					if (c != (0 + '0')) {
-						natural_was_here = 1;
-					}
-					else {
-						continue;
-					}
-				}
-				else {
-					BN_get(1, c);
-				}
+				stack_push(BN_get(1, c - '0'));
 			}
 		}
 		else if (((0 + '0') <= c) && (c <= (9 + '0'))) {
-			if (!natural_was_here) {
-				if (c != (0 + '0')) {
-					natural_was_here = 1;
-				}
-				else {
-					continue;
-				}
-			}
-			else {
-				BN_get(0, c);
-			}
+			stack_push(BN_get(0, c - '0'));
 		}
-		else if (c = '=') {
-			//print last
+		else if (c == '=') {
+			BN_print(stack_last());
 		}
-		natural_was_here = 0;
 	}
 	if (ferror(stdin)) {
 		printf("An error occurred while reading the numbers\n");

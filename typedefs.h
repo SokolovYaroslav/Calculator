@@ -1,7 +1,7 @@
 #pragma once
 
 typedef struct node{
-	unsigned char digit;
+	char digit;
 	struct node *next;
 	struct node *previous;
 } node;
