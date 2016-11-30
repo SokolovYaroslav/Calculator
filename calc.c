@@ -5,57 +5,69 @@
 
 int main () {
 	int c;
+	big_number *a;
+	big_number *b;
 	stack_launch();
 	while((c = getchar()) != EOF) {
 		if (c == '+') {
-			if (stack_size() < 2) {
-				printf("Not enough number to add\n");
+			if (getchar() != '\n') {
+				printf("Incorrect input, try again\n");
+				while (getchar() != '\n');
 				continue;
 			}
 			else {
-				stack_push(BN_addition(stack_pop(), stack_pop()));
-			}
-			while (getchar() != '\n') {
-				if (ferror(stdin)) {
-					printf("An error occurred while reading the symbols\n");
-					exit(0);
+				if (stack_size() < 2) {
+					printf("Not enough numbers to add\n");
+				}
+				else {
+					a = stack_pop();
+					b = stack_pop();
+					if (a->sign != b->sign) {
+						stack_push(BN_subtraction(a, b));
+						continue;
+					}
+					else {
+						stack_push(BN_addition(a, b));
+						continue;
+					}
 				}
 			}
-			continue;
-		}
-		else if (c == '*') {
-			//BN_multiple
-			while (getchar() != '\n') {
-				if (ferror(stdin)) {
-					printf("An error occurred while reading the symbols\n");
-					exit(0);
-				}
-			}
-			continue;
-		}
-		else if (c == '/') {
-			//BN_division
-			while (getchar() != '\n') {
-				if (ferror(stdin)) {
-					printf("An error occurred while reading the symbols\n");
-					exit(0);
-				}
-			}
-			continue;
-		}
-		else if (c == '-') {
-			c = getchar();
 			if (ferror(stdin)) {
 				printf("An error occurred while reading the numbers\n");
-				exit(0);
+				return 0;
 			}
-			if (c == '\n') {
-				//BN_subtraction
-				continue;
+		}
+		else if (c == '-') {
+			if ((c = getchar()) != '\n') {
+				if (((0 + '0') <= c) && (c <= (9 + '0'))) {
+					stack_push(BN_get(1, c - '0'));
+				}
+				else {
+					printf("Incorrect input, try again\n");
+					while (getchar() != '\n');
+					continue;
+				}
 			}
-			else if (((0 + '0') <= c) && (c <= (9 + '0'))) {
-				stack_push(BN_get(1, c - '0'));
+			else if (stack_size() < 2) {
+				printf("Not enough numbers to subtract\n");
 			}
+			else {
+				b = stack_pop();
+				a = stack_pop();
+				b->sign = (b->sign + 1) % 2;
+				if (a->sign != b->sign) {
+					stack_push(BN_subtraction(a, b));
+				}
+				else {
+					stack_push(BN_addition(a, b));
+				}
+			}
+		}
+		else if (c == '*') {
+			
+		}
+		else if (c == '/') {
+			
 		}
 		else if (((0 + '0') <= c) && (c <= (9 + '0'))) {
 			stack_push(BN_get(0, c - '0'));
@@ -66,7 +78,11 @@ int main () {
 	}
 	if (ferror(stdin)) {
 		printf("An error occurred while reading the numbers\n");
-		exit(0);
+		return 0;
 	}
+	while (stack_size() > 0) {
+		BN_del(stack_pop());
+	}
+	stack_clear();
 	return 1;
 }

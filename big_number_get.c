@@ -5,6 +5,10 @@
 node* node_init () {
 	node *new_node;
 	new_node = (node*)malloc(sizeof(node));
+	if (!new_node) {
+		printf("An error occurred while malloc node\n");
+		exit(0);
+	}
 	new_node->digit = 0;
 	new_node->previous = NULL;
 	new_node->next = NULL;
@@ -14,9 +18,14 @@ node* node_init () {
 big_number* BN_init () {
 	big_number *new_big_number;
 	new_big_number = (big_number*)malloc(sizeof(big_number));
+	if (!new_big_number) {
+		printf("An error occurred while malloc big number\n");
+		exit(0);
+	}
 	new_big_number->sign = 0;
 	new_big_number->head = NULL;
 	new_big_number->tail = NULL;
+	new_big_number->size = 0;
 	return new_big_number;
 }
 
@@ -40,6 +49,7 @@ void BN_del_tail (big_number *the_big_number) {
 		the_big_number->tail = NULL;
 		the_big_number->head = NULL;
 	}
+	the_big_number->size--;
 }
 
 void BN_del_head (big_number *the_big_number) {
@@ -53,15 +63,14 @@ void BN_del_head (big_number *the_big_number) {
 		the_big_number->head = NULL;
 		the_big_number->tail = NULL;
 	}
+	the_big_number->size--;
 }
 
 void BN_add_digit_in_tail (big_number *number, char the_new_digit) {
-	printf("BN_add_digit_in_tail\n");
 	node *new_digit;
 	new_digit = node_init();
 	new_digit->digit = the_new_digit;
 	if (number->tail) {
-		printf("number->tail\n");
 		new_digit->previous = number->tail;
 		number->tail->next = new_digit;
 		number->tail = new_digit;
@@ -70,6 +79,7 @@ void BN_add_digit_in_tail (big_number *number, char the_new_digit) {
 	number->tail = new_digit;
 	number->head = new_digit;
 	}
+	number->size++;
 }
 
 void BN_add_digit_in_head (big_number *number, char the_new_digit) {
@@ -85,10 +95,10 @@ void BN_add_digit_in_head (big_number *number, char the_new_digit) {
 	number->head = new_digit;
 	number->tail = new_digit;
 	}
+	number->size++;
 }
 
 big_number* BN_get (char sign, char the_first_digit) {
-	printf("BN_get\n");
 	big_number *number;
 	number = BN_init();
 	number->sign = sign;
@@ -97,15 +107,14 @@ big_number* BN_get (char sign, char the_first_digit) {
 	first_digit->digit = the_first_digit;
 	number->head = first_digit;
 	number->tail = first_digit;
-
+	number->size++;
 	int c;
 	while (((c = getchar()) != '\n') && (c != EOF)) {
-		c -= '0';
-		if (!((0 <= c) && (c <= 9))) {
-			printf("Wrong symbol in number\n");
+		if (!((0 + '0' <= c) && (c <= 9 + '0'))) {
+			continue;
 		}
 		else {
-			BN_add_digit_in_tail(number, c);
+			BN_add_digit_in_tail(number, c - '0');
 		}
 	}
 	if (ferror(stdin)) {
@@ -116,10 +125,18 @@ big_number* BN_get (char sign, char the_first_digit) {
 	return number;
 }
 
+void BN_swap (big_number *a, big_number *b) {
+	big_number tmp;
+	tmp = *a;
+	*a = *b;
+	*b = tmp;
+}
+
 big_number* BN_addition (big_number *a, big_number *b) {
 	char tmp = 0;
 	big_number *result;
 	result = BN_init();
+	result->sign = a->sign;
 	while((a->tail) && (b->tail)) {
 		BN_add_digit_in_head(result, ((a->tail->digit + b->tail->digit + tmp) % 10));
 		tmp = (a->tail->digit + b->tail->digit) / 10;
@@ -144,11 +161,76 @@ big_number* BN_addition (big_number *a, big_number *b) {
 	return result;
 }
 
+big_number* BN_subtraction (big_number *a, big_number *b) {
+	big_number *result;
+	result = BN_init();
+	if (BN_abs_compare(a, b) == 0) {
+		BN_add_digit_in_head(result, 0);
+		return result;
+	}
+	else if (BN_abs_compare(a, b) == -1) {
+		BN_swap(a, b);
+	}
+	result->sign = a->sign;
+	while (b->tail) {
+		if (a->tail->digit < b->tail->digit) {
+			a->tail->digit += 10;
+			a->tail->previous->digit--;
+		}
+		BN_add_digit_in_head(result, (a->tail->digit - b->tail->digit));
+		BN_del_tail(a);
+		BN_del_tail(b);
+	}
+	while (a->tail) {
+		if (a->tail->digit < 0) {
+			a->tail->digit += 10;
+			a->tail->previous->digit--;
+		}
+		BN_add_digit_in_head(result, a->tail->digit);
+		BN_del_tail(a);
+	}
+	free(a);
+	free(b);
+	BN_del_leading_zeros(result);
+	return result;
+}
+
 void BN_del_leading_zeros (big_number *the_big_number) {
 	while((the_big_number->head) && (the_big_number->head->digit == 0) && (the_big_number->head->next)) {
 		the_big_number->head = the_big_number->head->next;
 		free(the_big_number->head->previous);
 		the_big_number->head->previous = NULL;
+		the_big_number->size--;
+	}
+}
+
+char BN_abs_compare (big_number *a, big_number *b) {
+	if (a->size < b->size) {
+		return -1;
+	}
+	else if (a->size > b->size) {
+		return 1;
+	}
+	else {
+		node *current_digit_a;
+		current_digit_a = node_init();
+		current_digit_a = a->head;
+		node *current_digit_b;
+		current_digit_b = node_init();
+		current_digit_b = b->head;
+		while (current_digit_a) {
+			if (current_digit_a->digit < current_digit_b->digit) {
+				return -1;
+			}
+			else if (current_digit_a->digit > current_digit_b->digit) {
+				return 1;
+			}
+			else {
+				current_digit_a = current_digit_a->next;
+				current_digit_b = current_digit_b->next;
+			}
+		}
+		return 0;
 	}
 }
 

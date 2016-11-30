@@ -10,4 +10,5 @@ typedef struct big_number{
 	char sign;
 	struct node *head;
 	struct node *tail;
+	int size;
 } big_number;
