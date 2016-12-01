@@ -17,11 +17,15 @@ void BN_add_digit_in_head (big_number *number, char the_new_digit);
 
 big_number* BN_get (char sign, char the_first_digit);
 
+big_number* BN_get_zero ();
+
 void BN_swap (big_number *a, big_number *b);
 
 big_number* BN_addition (big_number *a, big_number *b);
 
 big_number* BN_subtraction (big_number *a, big_number *b);
+
+big_number* BN_multiplication (big_number *a, big_number *b);
 
 char BN_abs_compare (big_number *a, big_number *b);
 

@@ -125,6 +125,15 @@ big_number* BN_get (char sign, char the_first_digit) {
 	return number;
 }
 
+big_number* BN_get_zero () {
+	big_number *new_number = BN_init();
+	node *zero = node_init();
+	new_number->size++;
+	new_number->tail = zero;
+	new_number->head = zero;
+	return new_number;
+}
+
 void BN_swap (big_number *a, big_number *b) {
 	big_number tmp;
 	tmp = *a;
@@ -193,6 +202,78 @@ big_number* BN_subtraction (big_number *a, big_number *b) {
 	free(b);
 	BN_del_leading_zeros(result);
 	return result;
+}
+
+big_number* BN_multiplication (big_number *a, big_number *b) {
+	if (((a->size == 1) && (a->head->digit == 0)) ||
+		((b->size == 1) && (b->head->digit == 0))) {
+		big_number *result;
+		result = BN_init();
+		BN_add_digit_in_head(result, 0);
+		BN_del(a);
+		BN_del(b);
+		return result;
+	}
+	else if ((a->size == 1) && (a->head->digit == 1)) {
+		if (a->sign == 1) {
+			b->sign = (b->sign + 1) % 2;
+		}
+		BN_del(a);
+		return b;
+	}
+	else if ((b->size == 1) && (b->head->digit == 1)) {
+		if (b->sign == 1) {
+			a->sign = (a->sign + 1) % 2;
+		}
+		BN_del(b);
+		return a;
+	}
+	else {
+		if (a->size < b->size) {
+			BN_swap (a, b);
+		}
+		big_number *result = BN_init();
+		while(a->tail->digit == 0) {
+			BN_add_digit_in_head(result, 0);
+			BN_del_tail(a);
+		}
+		while(b->tail->digit == 0) {
+			BN_add_digit_in_head(result, 0);
+			BN_del_tail(b);
+		}
+		long int tmp = 0;
+		long int sum = 0;
+		node *the_current_node_a = node_init();
+		node *the_current_node_b = node_init();
+		node *current_digit_a = node_init();
+		node *current_digit_b = node_init();
+		the_current_node_a = a->tail;
+		the_current_node_b = b->tail;
+		while (the_current_node_b) {
+			current_digit_a = the_current_node_a;
+			current_digit_b = the_current_node_b;
+			while (current_digit_a && current_digit_b) {
+				sum += current_digit_a->digit * current_digit_b->digit;
+				current_digit_a = current_digit_a->next;
+				current_digit_b = current_digit_b->previous;
+			}
+			BN_add_digit_in_head(result, ((sum + tmp) % 10));
+			tmp = (sum + tmp) / 10;
+			sum = 0;
+			the_current_node_a = the_current_node_a->previous;
+			if (!the_current_node_a) {
+				the_current_node_a = a->head;
+				the_current_node_b = the_current_node_b->previous;
+			}
+		}
+		if (tmp > 0) {
+			BN_add_digit_in_head(result, tmp);
+		}
+		result->sign = (a->sign + b->sign) % 2;
+		BN_del(a);
+		BN_del(b);
+		return result;
+	}
 }
 
 void BN_del_leading_zeros (big_number *the_big_number) {
