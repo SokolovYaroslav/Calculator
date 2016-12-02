@@ -27,6 +27,8 @@ big_number* BN_subtraction (big_number *a, big_number *b);
 
 big_number* BN_multiplication (big_number *a, big_number *b);
 
+big_number* BN_division (big_number *a, big_number *b);
+
 char BN_abs_compare (big_number *a, big_number *b);
 
 void BN_del_leading_zeros (big_number *the_big_number);

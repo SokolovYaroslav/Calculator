@@ -229,7 +229,59 @@ big_number* BN_multiplication (big_number *a, big_number *b) {
 		return a;
 	}
 	else {
-		if (a->size < b->size) {
+		int amount_of_zero = 0;
+		while (a->tail->digit == 0) {
+			amount_of_zero++;
+			BN_del_tail(a);
+		}
+		while (b->tail->digit == 0) {
+			amount_of_zero++;
+			BN_del_tail(b);
+		}
+		int i = 0;
+		int tmp = 0;
+		big_number *result = BN_init();
+		for (i = 0; i < (a->size + b->size); i++) {
+			BN_add_digit_in_head(result, 0);
+		}
+		node *current_digit_a = node_init();
+		current_digit_a = a->tail;
+		node *current_digit_b = node_init();
+		current_digit_b = b->tail;
+		node *current_digit_result = node_init();
+		current_digit_result = result->tail;
+		node *the_current_node_result = node_init();
+		the_current_node_result = result->tail;
+		char old_current_digit_result;
+		while (current_digit_b) {
+			while (current_digit_a) {
+				old_current_digit_result = current_digit_result->digit;
+				current_digit_result->digit = ((current_digit_a->digit * current_digit_b->digit) + current_digit_result->digit + tmp) % 10;
+				tmp = ((current_digit_a->digit * current_digit_b->digit) + old_current_digit_result + tmp) / 10;
+				current_digit_a = current_digit_a->previous;
+				current_digit_result = current_digit_result->previous;
+			}
+			while (tmp) {
+				old_current_digit_result = current_digit_result->digit;
+				current_digit_result->digit = (current_digit_result->digit + tmp) % 10;
+				tmp = (old_current_digit_result + tmp) / 10;
+				current_digit_result = current_digit_result->previous;
+			}
+			current_digit_a = a->tail;
+			the_current_node_result = the_current_node_result->previous;
+			current_digit_result = the_current_node_result;
+			current_digit_b = current_digit_b->previous;
+		}
+		while (amount_of_zero > 0) {
+			BN_add_digit_in_tail(result, 0);
+			amount_of_zero--;
+		}
+		result->sign = (a->sign + b->sign) % 2;
+		BN_del_leading_zeros(result);
+		BN_del(a);
+		BN_del(b);
+		return result;
+	/*	if (a->size < b->size) {
 			BN_swap (a, b);
 		}
 		big_number *result = BN_init();
@@ -272,9 +324,22 @@ big_number* BN_multiplication (big_number *a, big_number *b) {
 		result->sign = (a->sign + b->sign) % 2;
 		BN_del(a);
 		BN_del(b);
-		return result;
+		return result;*/
 	}
 }
+
+/*big_number* BN_division (big_number *a, big_number *b) {
+	if ((b->size == 1) && (b->tail->digit == 1)) {
+		if (b->sign) {
+			a->sign = (a->sign + 1) % 2;
+		}
+		return a;
+	}
+	else {
+		big_number *result = BN_init();
+
+	}
+}*/
 
 void BN_del_leading_zeros (big_number *the_big_number) {
 	while((the_big_number->head) && (the_big_number->head->digit == 0) && (the_big_number->head->next)) {

@@ -86,7 +86,7 @@ int main () {
 			}
 		}
 		else if (c == '/') {
-			if (getchar() != '\n') {
+			/*if (getchar() != '\n') {
 				printf("Incorrect input, try again\n");
 				while (getchar() != '\n');
 				continue;
@@ -111,7 +111,7 @@ int main () {
 			if (ferror(stdin)) {
 				printf("An error occurred while reading the numbers\n");
 				return 0;
-			}
+			}*/
 		}
 		else if (((0 + '0') <= c) && (c <= (9 + '0'))) {
 			stack_push(BN_get(0, c - '0'));
