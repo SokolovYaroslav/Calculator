@@ -152,7 +152,7 @@ big_number* BN_addition (big_number *a, big_number *b) {
 	result->sign = a->sign;
 	while((a->tail) && (b->tail)) {
 		BN_add_digit_in_head(result, ((a->tail->digit + b->tail->digit + tmp) % 10));
-		tmp = (a->tail->digit + b->tail->digit) / 10;
+		tmp = (a->tail->digit + b->tail->digit + tmp) / 10;
 		BN_del_tail(a);
 		BN_del_tail(b);
 	}
