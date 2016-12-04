@@ -214,8 +214,8 @@ void BN_subtraction_for_division (big_number *a, big_number *b) {
 	if (BN_abs_compare(a, b) == 0) {
 		while (a->head) {
 			BN_del_tail(a);
-			return;
 		}
+		return;
 	}
 	node *current_digit_a;
 	node *current_digit_b;
@@ -401,7 +401,7 @@ big_number* BN_division (big_number *a, big_number *b) {
 		while (a->head) {
 			BN_add_digit_in_tail(prefix, a->head->digit);
 			BN_del_head(a);
-			while (BN_abs_compare(prefix, b) == -1) {
+			while ((BN_abs_compare(prefix, b) == -1) && a->head) {
 				BN_add_digit_in_tail(prefix, a->head->digit);
 				BN_del_head(a);
 				BN_add_digit_in_tail(result, 0);
@@ -409,6 +409,7 @@ big_number* BN_division (big_number *a, big_number *b) {
 					break;
 				}
 			}
+			BN_del_leading_zeros(prefix);
 			char count = 0;
 			while (BN_abs_compare(prefix, b) >= 0) {
 				BN_subtraction_for_division(prefix, b);
@@ -420,19 +421,7 @@ big_number* BN_division (big_number *a, big_number *b) {
 			BN_add_digit_in_tail(result, count);
 		}
 		if (prefix->head) {
-			if (!result->sign) {
-				node *current_digit_result;
-				current_digit_result = result->tail;
-				result->tail->digit -= 1;
-				while (current_digit_result) {
-					if (current_digit_result->digit < 0) {
-						current_digit_result->digit += 10;
-						current_digit_result->previous->digit--;
-					}
-					current_digit_result = current_digit_result->previous;
-				}
-			}
-			else {
+			if (result->sign) {
 				node *current_digit_result;
 				current_digit_result = result->tail;
 				result->tail->digit += 1;
