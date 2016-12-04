@@ -25,6 +25,8 @@ big_number* BN_addition (big_number *a, big_number *b);
 
 big_number* BN_subtraction (big_number *a, big_number *b);
 
+void BN_subtraction_for_division (big_number *a, big_number *b);
+
 big_number* BN_multiplication (big_number *a, big_number *b);
 
 big_number* BN_division (big_number *a, big_number *b);

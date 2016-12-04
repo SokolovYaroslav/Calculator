@@ -208,6 +208,39 @@ big_number* BN_subtraction (big_number *a, big_number *b) {
 	return result;
 }
 
+void BN_subtraction_for_division (big_number *a, big_number *b) {
+	BN_print(a);
+	BN_print(b);
+	if (BN_abs_compare(a, b) == 0) {
+		while (a->head) {
+			BN_del_tail(a);
+			return;
+		}
+	}
+	node *current_digit_a;
+	node *current_digit_b;
+	current_digit_a = a->tail;
+	current_digit_b = b->tail;
+	while (current_digit_b) {
+		if (current_digit_a->digit < current_digit_b->digit) {
+			current_digit_a->digit += 10;
+			current_digit_a->previous->digit--;
+		}
+		current_digit_a->digit -= current_digit_b->digit;
+		current_digit_a = current_digit_a->previous;
+		current_digit_b = current_digit_b->previous;
+	}
+	while (current_digit_a) {
+		if (current_digit_a->digit < 0) {
+			current_digit_a->digit += 10;
+			current_digit_a->previous->digit--;
+		}
+		current_digit_a = current_digit_a->previous;
+	}
+	BN_del_leading_zeros(a);
+	BN_print(a);
+}
+
 big_number* BN_multiplication (big_number *a, big_number *b) {
 	if (((a->size == 1) && (a->head->digit == 0)) ||
 		((b->size == 1) && (b->head->digit == 0))) {
@@ -332,18 +365,93 @@ big_number* BN_multiplication (big_number *a, big_number *b) {
 	}
 }
 
-/*big_number* BN_division (big_number *a, big_number *b) {
+big_number* BN_division (big_number *a, big_number *b) {
+	if (a->head->digit == 0) {
+		BN_del(b);
+		return a;
+	}
 	if ((b->size == 1) && (b->tail->digit == 1)) {
 		if (b->sign) {
 			a->sign = (a->sign + 1) % 2;
 		}
+		BN_del(b);
 		return a;
 	}
-	else {
-		big_number *result = BN_init();
-
+	big_number *result = BN_init();
+	if (BN_abs_compare(a, b) == -1) {
+		BN_add_digit_in_head(result, 0);
+		result->sign = (a->sign + b->sign) % 2;
+		if (result->sign) {
+			free(result);
+			big_number *new_result = BN_init();
+			new_result->sign = 1;
+			BN_add_digit_in_head(new_result, 1);
+			BN_del(a);
+			BN_del(b);
+			return new_result;
+		}
+		else {
+			BN_del(a);
+			BN_del(b);
+			return result;
+		}
 	}
-}*/
+	else {
+		big_number *prefix = BN_init();
+		while (a->head) {
+			BN_add_digit_in_tail(prefix, a->head->digit);
+			BN_del_head(a);
+			while (BN_abs_compare(prefix, b) == -1) {
+				BN_add_digit_in_tail(prefix, a->head->digit);
+				BN_del_head(a);
+				BN_add_digit_in_tail(result, 0);
+				if (!a->head) {
+					break;
+				}
+			}
+			char count = 0;
+			while (BN_abs_compare(prefix, b) >= 0) {
+				BN_subtraction_for_division(prefix, b);
+				count++;
+			}
+			if ((prefix->size == 1) && (prefix->head->digit == 0)) {
+				BN_del_head(prefix);
+			}
+			BN_add_digit_in_tail(result, count);
+		}
+		if (prefix->head) {
+			if (!result->sign) {
+				node *current_digit_result;
+				current_digit_result = result->tail;
+				result->tail->digit -= 1;
+				while (current_digit_result) {
+					if (current_digit_result->digit < 0) {
+						current_digit_result->digit += 10;
+						current_digit_result->previous->digit--;
+					}
+					current_digit_result = current_digit_result->previous;
+				}
+			}
+			else {
+				node *current_digit_result;
+				current_digit_result = result->tail;
+				result->tail->digit += 1;
+				while (current_digit_result) {
+					if (current_digit_result->digit > 9) {
+						current_digit_result->digit -= 10;
+						current_digit_result->previous->digit++;
+					}
+					current_digit_result = current_digit_result->previous;
+				}
+			}
+		}
+		BN_del_leading_zeros(result);
+		BN_del(a);
+		BN_del(b);
+		BN_del(prefix);
+		return result;
+	}
+}
 
 void BN_del_leading_zeros (big_number *the_big_number) {
 	while((the_big_number->head) && (the_big_number->head->digit == 0) && (the_big_number->head->next)) {
