@@ -382,7 +382,7 @@ big_number* BN_division (big_number *a, big_number *b) {
 		BN_add_digit_in_head(result, 0);
 		result->sign = (a->sign + b->sign) % 2;
 		if (result->sign) {
-			free(result);
+			BN_del(result);
 			big_number *new_result = BN_init();
 			new_result->sign = 1;
 			BN_add_digit_in_head(new_result, 1);
