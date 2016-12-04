@@ -281,13 +281,13 @@ big_number* BN_multiplication (big_number *a, big_number *b) {
 		for (i = 0; i < (a->size + b->size); i++) {
 			BN_add_digit_in_head(result, 0);
 		}
-		node *current_digit_a = node_init();
+		node *current_digit_a;
 		current_digit_a = a->tail;
-		node *current_digit_b = node_init();
+		node *current_digit_b;
 		current_digit_b = b->tail;
-		node *current_digit_result = node_init();
+		node *current_digit_result;
 		current_digit_result = result->tail;
-		node *the_current_node_result = node_init();
+		node *the_current_node_result;
 		the_current_node_result = result->tail;
 		char old_current_digit_result;
 		while (current_digit_b) {
@@ -471,10 +471,8 @@ char BN_abs_compare (big_number *a, big_number *b) {
 	}
 	else {
 		node *current_digit_a;
-		current_digit_a = node_init();
 		current_digit_a = a->head;
 		node *current_digit_b;
-		current_digit_b = node_init();
 		current_digit_b = b->head;
 		while (current_digit_a) {
 			if (current_digit_a->digit < current_digit_b->digit) {
