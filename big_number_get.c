@@ -169,8 +169,8 @@ big_number* BN_addition (big_number *a, big_number *b) {
 	if(tmp){
 		BN_add_digit_in_head(result, tmp);
 	}
-	free(a);
-	free(b);
+	BN_del(a);
+	BN_del(b);
 	return result;
 }
 
@@ -202,8 +202,8 @@ big_number* BN_subtraction (big_number *a, big_number *b) {
 		BN_add_digit_in_head(result, a->tail->digit);
 		BN_del_tail(a);
 	}
-	free(a);
-	free(b);
+	BN_del(a);
+	BN_del(b);
 	BN_del_leading_zeros(result);
 	return result;
 }
