@@ -30,6 +30,10 @@ big_number* BN_init () {
 }
 
 void BN_del (big_number *the_big_number) {
+	if (!the_big_number->head) {
+		free(the_big_number);
+		return;
+	}
 	while (the_big_number->head->next) {
 		the_big_number->head = the_big_number->head->next;
 		free(the_big_number->head->previous);
