@@ -234,7 +234,6 @@ void BN_subtraction_for_division (big_number *a, big_number *b) {
 		current_node_a = current_node_a->previous;
 	}
 	BN_del_leading_zeros(a);
-	BN_print(a);
 }
 
 big_number* BN_multiplication (big_number *a, big_number *b) {

@@ -98,7 +98,7 @@ int main () {
 				else {
 					b = stack_pop();
 					if (b->head->digit == 0) {
-						printf("Divison by zero\n");
+						printf("Divison by zero, try again\n");
 						stack_push(BN_get_zero());
 						continue;
 					}
