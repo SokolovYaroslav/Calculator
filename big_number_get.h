@@ -1,9 +1,9 @@
 #pragma once
 #include "typedefs.h"
 
-node* node_init ();
+node* node_create ();
 
-big_number* BN_init ();
+big_number* BN_create ();
 
 void BN_del (big_number *the_big_number);
 

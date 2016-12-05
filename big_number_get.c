@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "big_number_get.h"
 
-node* node_init () {
+node* node_create () {
 	node *new_node;
 	new_node = (node*)malloc(sizeof(node));
 	if (!new_node) {
@@ -15,7 +15,7 @@ node* node_init () {
 	return new_node;
 }
 
-big_number* BN_init () {
+big_number* BN_create () {
 	big_number *new_big_number;
 	new_big_number = (big_number*)malloc(sizeof(big_number));
 	if (!new_big_number) {
@@ -72,7 +72,7 @@ void BN_del_head (big_number *the_big_number) {
 
 void BN_add_digit_in_tail (big_number *number, char the_new_digit) {
 	node *new_digit;
-	new_digit = node_init();
+	new_digit = node_create();
 	new_digit->digit = the_new_digit;
 	if (number->tail) {
 		new_digit->previous = number->tail;
@@ -88,7 +88,7 @@ void BN_add_digit_in_tail (big_number *number, char the_new_digit) {
 
 void BN_add_digit_in_head (big_number *number, char the_new_digit) {
 	node *new_digit;
-	new_digit = node_init();
+	new_digit = node_create();
 	new_digit->digit = the_new_digit;
 	if (number->head) {
 		new_digit->next = number->head;
@@ -104,10 +104,10 @@ void BN_add_digit_in_head (big_number *number, char the_new_digit) {
 
 big_number* BN_get (char sign, char the_first_digit) {
 	big_number *number;
-	number = BN_init();
+	number = BN_create();
 	number->sign = sign;
 	node *first_digit;
-	first_digit = node_init();
+	first_digit = node_create();
 	first_digit->digit = the_first_digit;
 	number->head = first_digit;
 	number->tail = first_digit;
@@ -130,8 +130,8 @@ big_number* BN_get (char sign, char the_first_digit) {
 }
 
 big_number* BN_get_zero () {
-	big_number *new_number = BN_init();
-	node *zero = node_init();
+	big_number *new_number = BN_create();
+	node *zero = node_create();
 	new_number->size++;
 	new_number->tail = zero;
 	new_number->head = zero;
@@ -148,7 +148,7 @@ void BN_swap (big_number *a, big_number *b) {
 big_number* BN_addition (big_number *a, big_number *b) {
 	char tmp = 0;
 	big_number *result;
-	result = BN_init();
+	result = BN_create();
 	result->sign = a->sign;
 	while((a->tail) && (b->tail)) {
 		BN_add_digit_in_head(result, ((a->tail->digit + b->tail->digit + tmp) % 10));
@@ -176,7 +176,7 @@ big_number* BN_addition (big_number *a, big_number *b) {
 
 big_number* BN_subtraction (big_number *a, big_number *b) {
 	big_number *result;
-	result = BN_init();
+	result = BN_create();
 	if (BN_abs_compare(a, b) == 0) {
 		BN_add_digit_in_head(result, 0);
 		return result;
@@ -241,7 +241,7 @@ big_number* BN_multiplication (big_number *a, big_number *b) {
 	if (((a->size == 1) && (a->head->digit == 0)) ||
 		((b->size == 1) && (b->head->digit == 0))) {
 		big_number *result;
-		result = BN_init();
+		result = BN_create();
 		BN_add_digit_in_head(result, 0);
 		BN_del(a);
 		BN_del(b);
@@ -273,7 +273,7 @@ big_number* BN_multiplication (big_number *a, big_number *b) {
 		}
 		int i = 0;
 		int tmp = 0;
-		big_number *result = BN_init();
+		big_number *result = BN_create();
 		for (i = 0; i < (a->size + b->size); i++) {
 			BN_add_digit_in_head(result, 0);
 		}
@@ -325,13 +325,13 @@ big_number* BN_division (big_number *a, big_number *b) {
 		BN_del(b);
 		return a;
 	}
-	big_number *result = BN_init();
+	big_number *result = BN_create();
 	if (BN_abs_compare(a, b) == -1) {
 		BN_add_digit_in_head(result, 0);
 		result->sign = (a->sign + b->sign) % 2;
 		if (result->sign) {
 			BN_del(result);
-			big_number *new_result = BN_init();
+			big_number *new_result = BN_create();
 			new_result->sign = 1;
 			BN_add_digit_in_head(new_result, 1);
 			BN_del(a);
@@ -345,7 +345,7 @@ big_number* BN_division (big_number *a, big_number *b) {
 		}
 	}
 	else {
-		big_number *prefix = BN_init();
+		big_number *prefix = BN_create();
 		while (a->head) {
 			BN_add_digit_in_tail(prefix, a->head->digit);
 			BN_del_head(a);
