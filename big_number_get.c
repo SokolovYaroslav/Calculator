@@ -310,50 +310,6 @@ big_number* BN_multiplication (big_number *a, big_number *b) {
 		BN_del(a);
 		BN_del(b);
 		return result;
-	/*	if (a->size < b->size) {
-			BN_swap (a, b);
-		}
-		big_number *result = BN_init();
-		while(a->tail->digit == 0) {
-			BN_add_digit_in_head(result, 0);
-			BN_del_tail(a);
-		}
-		while(b->tail->digit == 0) {
-			BN_add_digit_in_head(result, 0);
-			BN_del_tail(b);
-		}
-		long int tmp = 0;
-		long int sum = 0;
-		node *the_current_node_a = node_init();
-		node *the_current_node_b = node_init();
-		node *current_digit_a = node_init();
-		node *current_digit_b = node_init();
-		the_current_node_a = a->tail;
-		the_current_node_b = b->tail;
-		while (the_current_node_b) {
-			current_digit_a = the_current_node_a;
-			current_digit_b = the_current_node_b;
-			while (current_digit_a && current_digit_b) {
-				sum += current_digit_a->digit * current_digit_b->digit;
-				current_digit_a = current_digit_a->next;
-				current_digit_b = current_digit_b->previous;
-			}
-			BN_add_digit_in_head(result, ((sum + tmp) % 10));
-			tmp = (sum + tmp) / 10;
-			sum = 0;
-			the_current_node_a = the_current_node_a->previous;
-			if (!the_current_node_a) {
-				the_current_node_a = a->head;
-				the_current_node_b = the_current_node_b->previous;
-			}
-		}
-		if (tmp > 0) {
-			BN_add_digit_in_head(result, tmp);
-		}
-		result->sign = (a->sign + b->sign) % 2;
-		BN_del(a);
-		BN_del(b);
-		return result;*/
 	}
 }
 
