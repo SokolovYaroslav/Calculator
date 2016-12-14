@@ -299,6 +299,7 @@ big_number* BN_multiplication (big_number *a, big_number *b) {
 			starting_node_result = starting_node_result->previous;
 			current_node_result = starting_node_result;
 			current_node_b = current_node_b->previous;
+			BN_del_tail(b);
 		}
 		while (amount_of_zero > 0) {
 			BN_add_digit_in_tail(result, 0);
@@ -307,7 +308,7 @@ big_number* BN_multiplication (big_number *a, big_number *b) {
 		result->sign = (a->sign + b->sign) % 2;
 		BN_del_leading_zeros(result);
 		BN_del(a);
-		BN_del(b);
+		free(b);
 		return result;
 	}
 }
