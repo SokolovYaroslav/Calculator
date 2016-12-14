@@ -17,7 +17,7 @@ int main () {
 			}
 			else {
 				if (stack_size() < 2) {
-					printf("Not enough numbers to add\n");
+					printf("empty stack\n");
 				}
 				else {
 					a = stack_pop();
@@ -49,7 +49,7 @@ int main () {
 				}
 			}
 			else if (stack_size() < 2) {
-				printf("Not enough numbers to subtract\n");
+				printf("empty stack\n");
 			}
 			else {
 				b = stack_pop();
@@ -73,7 +73,7 @@ int main () {
 			}
 			else {
 				if (stack_size() < 2) {
-					printf("Not enough numbers to add\n");
+					printf("empty stack\n");
 				}
 				else {
 					stack_push(BN_multiplication(stack_pop(), stack_pop()));
@@ -93,7 +93,7 @@ int main () {
 			}
 			else {
 				if (stack_size() < 2) {
-					printf("Not enough numbers to add\n");
+					printf("empty stack\n");
 				}
 				else {
 					b = stack_pop();
@@ -117,7 +117,12 @@ int main () {
 			stack_push(BN_get(0, c - '0'));
 		}
 		else if (c == '=') {
-			BN_print(stack_last());
+			if (stack_size() > 0) {
+				BN_print(stack_last());
+			}
+			else {
+				printf("empty stack\n");
+			}
 		}
 	}
 	if (ferror(stdin)) {
