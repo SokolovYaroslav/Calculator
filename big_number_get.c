@@ -70,7 +70,7 @@ void BN_del_head (big_number *the_big_number) {
 	the_big_number->size--;
 }
 
-void BN_add_digit_in_tail (big_number *number, char the_new_digit) {
+void BN_add_digit_in_tail (big_number *number, long long int the_new_digit) {
 	node *new_digit;
 	new_digit = node_create();
 	new_digit->digit = the_new_digit;
@@ -86,7 +86,7 @@ void BN_add_digit_in_tail (big_number *number, char the_new_digit) {
 	number->size++;
 }
 
-void BN_add_digit_in_head (big_number *number, char the_new_digit) {
+void BN_add_digit_in_head (big_number *number, long long int the_new_digit) {
 	node *new_digit;
 	new_digit = node_create();
 	new_digit->digit = the_new_digit;
@@ -102,30 +102,49 @@ void BN_add_digit_in_head (big_number *number, char the_new_digit) {
 	number->size++;
 }
 
-big_number* BN_get (char sign, char the_first_digit) {
-	big_number *number;
-	number = BN_create();
-	number->sign = sign;
-	node *first_digit;
-	first_digit = node_create();
-	first_digit->digit = the_first_digit;
-	number->head = first_digit;
-	number->tail = first_digit;
-	number->size++;
+big_number_in_array* BN_get_in_array (char the_first_digit) {
+	big_number_in_array *number;
+	number = (big_number_in_array*)malloc(sizeof(big_number_in_array));
+	int capacity = 1024;
+	number->array = (char*)malloc(sizeof(char) * capacity);
+	number->array[0] = the_first_digit;
+	number->size = 1;
 	int c;
 	while (((c = getchar()) != '\n') && (c != EOF)) {
+		if (number->size >= capacity) {
+			capacity *= 2;
+			number->array = (char*)realloc(number->array, sizeof(char) * capacity);
+		}
 		if (!((0 + '0' <= c) && (c <= 9 + '0'))) {
 			continue;
 		}
 		else {
-			BN_add_digit_in_tail(number, c - '0');
+			number->array[number->size++] = c;
 		}
 	}
 	if (ferror(stdin)) {
 		printf("An error occurred while reading the numbers\n");
 		exit(0);
 	}
-	BN_del_leading_zeros(number);
+	return number;
+}
+
+big_number* BN_get (char sign, char the_first_digit) {
+	big_number *number;
+	number = BN_create();
+	number->sign = sign;
+	big_number_in_array *number_in_array = BN_get_in_array(the_first_digit);
+	char digit[10];
+	digit[9] = '\n';
+	for (int i = (number_in_array->size - 1); i >= 0; i -= 9) {
+		int j = 0;
+		for (j = 0; ((j < 9) && ((i - j) >= 0)); j++) {
+			digit[8 - j] = number_in_array->array[i - j];
+		}
+		BN_add_digit_in_head(number, strtoll(digit + (9 - j), NULL, 10));
+	}
+	free(number_in_array->array);
+	free(number_in_array);
 	return number;
 }
 
@@ -146,24 +165,24 @@ void BN_swap (big_number *a, big_number *b) {
 }
 
 big_number* BN_addition (big_number *a, big_number *b) {
-	char tmp = 0;
+	long long int tmp = 0;
 	big_number *result;
 	result = BN_create();
 	result->sign = a->sign;
 	while((a->tail) && (b->tail)) {
-		BN_add_digit_in_head(result, ((a->tail->digit + b->tail->digit + tmp) % 10));
-		tmp = (a->tail->digit + b->tail->digit + tmp) / 10;
+		BN_add_digit_in_head(result, ((a->tail->digit + b->tail->digit + tmp) % 1000000000));
+		tmp = (a->tail->digit + b->tail->digit + tmp) / 1000000000;
 		BN_del_tail(a);
 		BN_del_tail(b);
 	}
 	while (a->tail) {
-		BN_add_digit_in_head(result, ((a->tail->digit + tmp) % 10));
-		tmp = (a->tail->digit + tmp) / 10;
+		BN_add_digit_in_head(result, ((a->tail->digit + tmp) % 1000000000));
+		tmp = (a->tail->digit + tmp) / 1000000000;
 		BN_del_tail(a);
 	}
 	while (b->tail) {
-		BN_add_digit_in_head(result, ((b->tail->digit + tmp) % 10));
-		tmp = (b->tail->digit + tmp) / 10;
+		BN_add_digit_in_head(result, ((b->tail->digit + tmp) % 1000000000));
+		tmp = (b->tail->digit + tmp) / 1000000000;
 		BN_del_tail(b);
 	}
 	if(tmp){
@@ -187,7 +206,7 @@ big_number* BN_subtraction (big_number *a, big_number *b) {
 	result->sign = a->sign;
 	while (b->tail) {
 		if (a->tail->digit < b->tail->digit) {
-			a->tail->digit += 10;
+			a->tail->digit += 1000000000;
 			a->tail->previous->digit--;
 		}
 		BN_add_digit_in_head(result, (a->tail->digit - b->tail->digit));
@@ -196,7 +215,7 @@ big_number* BN_subtraction (big_number *a, big_number *b) {
 	}
 	while (a->tail) {
 		if (a->tail->digit < 0) {
-			a->tail->digit += 10;
+			a->tail->digit += 1000000000;
 			a->tail->previous->digit--;
 		}
 		BN_add_digit_in_head(result, a->tail->digit);
@@ -219,7 +238,7 @@ void BN_subtraction_for_division (big_number *a, big_number *b) {
 	node *current_node_b = b->tail;
 	while (current_node_b) {
 		if (current_node_a->digit < current_node_b->digit) {
-			current_node_a->digit += 10;
+			current_node_a->digit += 1000000000;
 			current_node_a->previous->digit--;
 		}
 		current_node_a->digit -= current_node_b->digit;
@@ -228,7 +247,7 @@ void BN_subtraction_for_division (big_number *a, big_number *b) {
 	}
 	while (current_node_a) {
 		if (current_node_a->digit < 0) {
-			current_node_a->digit += 10;
+			current_node_a->digit += 1000000000;
 			current_node_a->previous->digit--;
 		}
 		current_node_a = current_node_a->previous;
@@ -280,19 +299,19 @@ big_number* BN_multiplication (big_number *a, big_number *b) {
 		node *current_node_b = b->tail;
 		node *current_node_result = result->tail;
 		node *starting_node_result = result->tail;
-		char old_current_digit_result;
+		long long int old_current_digit_result;
 		while (current_node_b) {
 			while (current_node_a) {
 				old_current_digit_result = current_node_result->digit;
-				current_node_result->digit = ((current_node_a->digit * current_node_b->digit) + current_node_result->digit + tmp) % 10;
-				tmp = ((current_node_a->digit * current_node_b->digit) + old_current_digit_result + tmp) / 10;
+				current_node_result->digit = ((current_node_a->digit * current_node_b->digit) + current_node_result->digit + tmp) % 1000000000;
+				tmp = ((current_node_a->digit * current_node_b->digit) + old_current_digit_result + tmp) / 1000000000;
 				current_node_a = current_node_a->previous;
 				current_node_result = current_node_result->previous;
 			}
 			while (tmp) {
 				old_current_digit_result = current_node_result->digit;
-				current_node_result->digit = (current_node_result->digit + tmp) % 10;
-				tmp = (old_current_digit_result + tmp) / 10;
+				current_node_result->digit = (current_node_result->digit + tmp) % 1000000000;
+				tmp = (old_current_digit_result + tmp) / 1000000000;
 				current_node_result = current_node_result->previous;
 			}
 			current_node_a = a->tail;
@@ -345,6 +364,7 @@ big_number* BN_division (big_number *a, big_number *b) {
 		}
 	}
 	else {
+		printf("into division\n");
 		big_number *prefix = BN_create();
 		while (a->head) {
 			BN_add_digit_in_tail(prefix, a->head->digit);
@@ -358,23 +378,42 @@ big_number* BN_division (big_number *a, big_number *b) {
 				}
 			}
 			BN_del_leading_zeros(prefix);
-			char count = 0;
-			while (BN_abs_compare(prefix, b) >= 0) {
-				BN_subtraction_for_division(prefix, b);
-				count++;
+			long long int result_digit = 0;
+			long long int power = 1000000000;
+			if (BN_abs_compare(prefix, b) >= 0) {
+				printf("q\n");
+				BN_add_digit_in_tail(b, 0);
+				for (int i = 8; i >= 0; i--) {
+					printf("qqq\n");
+					node *current_node = prefix->head;
+					char tmp = 0;
+					long long int new_prefix_digit = 0;
+					while (current_node) {
+						new_prefix_digit = (current_node->digit / 10) + (tmp * 1000000000);
+						tmp = current_node->digit % 10;
+						current_node->digit = new_prefix_digit;
+						current_node = current_node->next; 
+					}
+					BN_del_leading_zeros(prefix);
+					power /= 10;
+					while (BN_abs_compare(prefix, b) >= 0) {
+						BN_subtraction_for_division(prefix, b);
+						result_digit += power;
+					}
+				}
 			}
 			if ((prefix->size == 1) && (prefix->head->digit == 0)) {
 				BN_del_head(prefix);
 			}
-			BN_add_digit_in_tail(result, count);
+			BN_add_digit_in_tail(result, result_digit);
 		}
 		if (prefix->head) {
 			if (result->sign) {
 				node *current_node_result = result->tail;
 				result->tail->digit += 1;
 				while (current_node_result) {
-					if (current_node_result->digit > 9) {
-						current_node_result->digit -= 10;
+					if (current_node_result->digit > (1000000000 - 1)) {
+						current_node_result->digit -= 1000000000;
 						current_node_result->previous->digit++;
 					}
 					current_node_result = current_node_result->previous;
@@ -430,8 +469,10 @@ void BN_print (big_number *the_big_number) {
 	}
 	node *next_to_print;
 	next_to_print = the_big_number->head;
+	printf("%lld", next_to_print->digit);
+	next_to_print = next_to_print->next;
 	while (next_to_print) {
-		printf("%c", (next_to_print->digit + '0'));
+		printf("%.9lld", next_to_print->digit);
 		next_to_print = next_to_print->next;
 	}
 	printf("\n");

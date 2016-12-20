@@ -1,14 +1,19 @@
 #pragma once
 
+typedef struct big_number_in_array{
+	unsigned long long int size;
+	char* array;	
+} big_number_in_array;
+
 typedef struct node{
-	char digit;
+	long long int digit;
 	struct node *next;
 	struct node *previous;
 } node;
 
 typedef struct big_number{
-	char sign;
+	char sign : 1;
+	unsigned int size : 7;
 	struct node *head;
 	struct node *tail;
-	int size;
 } big_number;

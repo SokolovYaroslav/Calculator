@@ -40,7 +40,7 @@ int main () {
 		else if (c == '-') {
 			if ((c = getchar()) != '\n') {
 				if (((0 + '0') <= c) && (c <= (9 + '0'))) {
-					stack_push(BN_get(1, c - '0'));
+					stack_push(BN_get(1, c));
 				}
 				else {
 					printf("Incorrect input, try again\n");
@@ -114,7 +114,7 @@ int main () {
 			}
 		}
 		else if (((0 + '0') <= c) && (c <= (9 + '0'))) {
-			stack_push(BN_get(0, c - '0'));
+			stack_push(BN_get(0, c));
 		}
 		else if (c == '=') {
 			if (stack_size() > 0) {
