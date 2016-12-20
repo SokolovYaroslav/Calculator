@@ -328,24 +328,13 @@ big_number* BN_division (big_number *a, big_number *b) {
 	big_number *result = BN_create();
 	if (BN_abs_compare(a, b) == -1) {
 		BN_add_digit_in_head(result, 0);
-		result->sign = (a->sign + b->sign) % 2;
-		if (result->sign) {
-			BN_del(result);
-			big_number *new_result = BN_create();
-			new_result->sign = 1;
-			BN_add_digit_in_head(new_result, 1);
-			BN_del(a);
-			BN_del(b);
-			return new_result;
-		}
-		else {
-			BN_del(a);
-			BN_del(b);
-			return result;
-		}
+		BN_del(a);
+		BN_del(b);
+		return result;
 	}
 	else {
 		big_number *prefix = BN_create();
+		result->sign = (a->sign + b->sign) % 2;
 		while (a->head) {
 			BN_add_digit_in_tail(prefix, a->head->digit);
 			BN_del_head(a);
@@ -367,19 +356,6 @@ big_number* BN_division (big_number *a, big_number *b) {
 				BN_del_head(prefix);
 			}
 			BN_add_digit_in_tail(result, count);
-		}
-		if (prefix->head) {
-			if (result->sign) {
-				node *current_node_result = result->tail;
-				result->tail->digit += 1;
-				while (current_node_result) {
-					if (current_node_result->digit > 9) {
-						current_node_result->digit -= 10;
-						current_node_result->previous->digit++;
-					}
-					current_node_result = current_node_result->previous;
-				}
-			}
 		}
 		BN_del_leading_zeros(result);
 		BN_del(a);
