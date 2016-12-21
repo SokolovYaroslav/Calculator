@@ -145,6 +145,7 @@ big_number* BN_get (char sign, char the_first_digit) {
 	}
 	free(number_in_array->array);
 	free(number_in_array);
+	BN_del_leading_zeros(number);
 	return number;
 }
 
